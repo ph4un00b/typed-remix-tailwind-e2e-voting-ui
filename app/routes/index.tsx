@@ -46,7 +46,7 @@ export default function Index() {
     );
   } else {
     // aqui podria usarse Suspense en modo CSR
-    // pero este framework esta pensado 
+    // pero este framework esta pensado
     // para SSR first
     return (
       <div className="m-auto sm:w-1/2">
@@ -90,7 +90,12 @@ function SearchCode() {
         }
 
         setMoviesMap(moviesMap);
-        setCategories(Object.keys(moviesMap));
+        
+        const orderedCategories = Object.keys(moviesMap).sort((a, b) =>
+          a.localeCompare(b)
+        );
+
+        setCategories(orderedCategories);
       } catch (e) {
         if (control.signal.aborted) {
           console.error("do something with the abort error!");
