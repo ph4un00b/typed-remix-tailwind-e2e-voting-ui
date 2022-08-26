@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import { ChangeEvent, Fragment } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useHydrated } from "remix-utils";
 import critical from "~/styles/critical.css";
@@ -15,8 +15,8 @@ type options = {
 };
 
 export function links() {
-  // para la demo, no se post-proceso el css
-  // pero, esto se configura tradicionalmente con postcss
+  // for demo, no css post-process
+  // usually use postcss
   return [
     { rel: "stylesheet", href: critical },
     {
@@ -37,7 +37,7 @@ export default function Index() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  // para la demo, simulando CSR client-side loading
+  // just for demo, simulating CSR client-side loading
   if (isHydrated && isLoaded) {
     return (
       <div>
@@ -45,9 +45,8 @@ export default function Index() {
       </div>
     );
   } else {
-    // aqui podria usarse Suspense en modo CSR
-    // pero este framework esta pensado
-    // para SSR first
+    // you can use React.Suspense in pure CSR
+    // but remix is SSR first
     return (
       <div className="m-auto sm:w-1/2">
         <SkeletonP />
@@ -90,7 +89,7 @@ function SearchCode() {
         }
 
         setMoviesMap(moviesMap);
-        
+
         const orderedCategories = Object.keys(moviesMap).sort((a, b) =>
           a.localeCompare(b)
         );
@@ -110,8 +109,17 @@ function SearchCode() {
     };
   }, []);
 
-  // se podría memoizar pero
-  // hasta no tener analiticos claros
+  // we could memoize (useMemo) this but we need real metrics to do that.
+  // {
+  //   const filteredMovies = useMemo(
+  //     () =>
+  //       titles.filter(({ title }) =>
+  //         title.toLowerCase().includes(query.toLowerCase())
+  //       ),
+  //     [query, titles],
+  //   );
+  // }
+
   const filteredMovies = titles.filter(({ title }) =>
     title.toLowerCase().includes(query.toLowerCase())
   );
@@ -130,6 +138,33 @@ function SearchCode() {
         placeholder="search a movie title..."
         value={query}
       />
+
+      {query.length > 0 ? <span>Results: {filteredMovies.length}</span> : null}
+
+      <ul>
+        {filteredMovies.length > 0 && query.length > 0 &&
+          filteredMovies
+            .slice(0, 8)
+            .map((movie) => (
+              <p
+                className="badge badge-lg badge-accent mr-[1rem] mb-[1rem]"
+                key={movie.id}
+              >
+                {movie.id.replaceAll("-", " ")}
+              </p>
+            ))}
+      </ul>
+
+      <ul>
+        {filteredMovies.length > 0 && query.length > 0 &&
+          filteredMovies
+            .slice(0, 1)
+            .map((movie) => (
+              <span data-result={movie.id}  key={movie.id}>
+                <MovieCardImage data={movie} />
+              </span>
+            ))}
+      </ul>
 
       <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
         {categories.map((category) => (
@@ -200,17 +235,16 @@ function SearchCode() {
   );
 }
 
-// componentes colocados a menos que empiezen a compartirse
-// en diferentes rutas, entonces procedemos a crear
-// una organizacion (atomica, screaming, por feature, etc.)
-// por naturaleza conforme el proyecto crece se van compartiendo componentes
+// colocated components until it grows organically
+// then we can procceed to (atomic design, screaming design, by feature, etc.)
 
 function MovieCardImage({ data }: { data: Movie }) {
   return (
     <div className="card w-[16rem] sm:w-[23rem] m-auto bg-base-100 shadow-xl image-full">
       <figure>
+        {/* todo: lazy skeleton for img */}
         {/* retrasando la carga de imagenes para alivianar la carga inicial del sitio */}
-        <img loading="lazy" src={data.photoUrL} alt={`${data.id} imagen`} />
+        <img data-image={data.id} loading="lazy" src={data.photoUrL} alt={`${data.id} imagen`} />
       </figure>
       <div className="grid place-items-center card-body">
         <h2 className="card-title font-medium text-gray-100">{data.title}</h2>
