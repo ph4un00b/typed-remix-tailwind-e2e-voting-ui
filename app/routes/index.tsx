@@ -1,4 +1,11 @@
-import { ChangeEvent, createContext, Dispatch, SetStateAction, useContext } from "react";
+import type {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction} from "react";
+import {
+  createContext,
+  useContext,
+} from "react";
 import { useEffect, useRef, useState } from "react";
 import { useHydrated } from "remix-utils";
 import critical from "~/styles/critical.css";
@@ -56,12 +63,11 @@ export default function Index() {
 }
 
 type SelectedContextT = {
-  selected: {[category: string]: string};
-  setSelected: Dispatch<SetStateAction<any>>;
+  selected: Record<string, string>;
+  setSelected: Dispatch<SetStateAction<Record<string, string>>>;
 };
 
 const SelectedContext = createContext<SelectedContextT | null>(null);
-
 const moviesEndpoint = "https://ph4un00b.github.io/data/30movies.json";
 
 function SearchCode() {
@@ -71,8 +77,7 @@ function SearchCode() {
   const [query, setQuery] = useState<string>("");
   const [categories, setCategories] = useState<string[]>([]);
   const [moviesMap, setMoviesMap] = useState<options>({});
-  const [votes, setVotes] = useState<string[]>([]);
-  const [selected, setSelected] = useState<any>({});
+  const [selected, setSelected] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -182,7 +187,9 @@ function SearchCode() {
           <div key={category} data-category={category} className="collapse">
             <input type="checkbox" className="peer" />
             <div className="collapse-title m-auto border rounded-md border-gray-300 mb-[1rem] text-primary-content peer-checked:border-rose-600 peer-checked:text-secondary-content">
-              { selected[category] ? `${category}: ${selected[category]} selected!` : category }
+              {selected[category]
+                ? `${category}: ${selected[category]} selected!`
+                : category}
             </div>
 
             <div className="collapse-content border-transparent text-primary-content peer-checked:text-secondary-content">
@@ -194,9 +201,10 @@ function SearchCode() {
                       id={`movie-${movie.id}`}
                       className="carousel-item sm:w-full"
                     >
-                      <SelectedContext.Provider value={{selected, setSelected}}>
-                      <MovieCardImage data={movie} />
-
+                      <SelectedContext.Provider
+                        value={{ selected, setSelected }}
+                      >
+                        <MovieCardImage data={movie} />
                       </SelectedContext.Provider>
                     </div>
                   ))}
@@ -218,18 +226,7 @@ function SearchCode() {
           </div>
         ))}
 
-        {/* propswithchildren */}
         <label
-          onClick={() => {
-            if (formRef.current) {
-              const formData = new FormData(formRef.current);
-              const votes = [...formData.entries()]
-                .map((x) => {
-                  return `${x[0]}: ${String(x[1]).replaceAll("-", " ")}`;
-                });
-              setVotes(votes);
-            }
-          }}
           htmlFor="my-modal-6"
           className="btn btn-secondary modal-button my-[1.5rem]"
         >
@@ -243,10 +240,20 @@ function SearchCode() {
           <h3 className="font-bold text-lg uppercase">Votes sumitted!</h3>
           <p className="py-4">Your votes:</p>
           <ul>
-            {votes && votes.map((vote) => <li key={vote}>{vote}</li>)}
+            {Object.keys(selected).length > 0 &&
+              Object.entries(selected).map(([category, selected]) => (
+                <li key={category}>{category}: {selected}</li>
+              ))}
           </ul>
           <div className="modal-action">
-            <label htmlFor="my-modal-6" className="btn">
+            <label
+              onClick={() => {
+                formRef.current?.reset();
+                setSelected({});
+              }}
+              htmlFor="my-modal-6"
+              className="btn"
+            >
               close
             </label>
           </div>
@@ -302,14 +309,14 @@ function MovieImage({ data }: { data: Movie }) {
 function RadioBtn({ data }: { data: Movie }) {
   const { setSelected } = useContext(SelectedContext) as SelectedContextT;
 
-return (
-  <label
-    onClick={() => {
-      setSelected((prev: any) => {
-        prev[data.category] = data.id.replaceAll('-', ' ');
-        return {...prev};
-      });
-    }}
+  return (
+    <label
+      onClick={() => {
+        setSelected((prev: any) => {
+          prev[data.category] = data.id.replaceAll("-", " ");
+          return { ...prev };
+        });
+      }}
       htmlFor={`vote-${data.category}`}
       className="relative px-4 py-2 text-center rounded-md cursor-pointer"
     >

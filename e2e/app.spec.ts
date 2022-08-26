@@ -62,7 +62,7 @@ test("Search for a movie title", async ({ page }) => {
   await expectQueryVisible(find, '[data-result="tenet"]');
 });
 
-test.only("Select a movie per category and show 'selected' state and Upon submission, display a modal box showing your votes", async ({ page }) => {
+test("Select a movie per category and show 'selected' state and Upon submission, display a modal box showing your votes", async ({ page }) => {
   const find = page.locator.bind(page);
   await page.goto("/");
 
@@ -91,4 +91,32 @@ test.only("Select a movie per category and show 'selected' state and Upon submis
   await expectVisible(find, "Best Supporting Actor: daniel kaluuya");
   await expectVisible(find, "Best Supporting Actress: olivia coleman");
   await expectVisible(find, "Best Visual Effects: midnight sky");
+});
+
+test("When the modal is closed, the ballot resets and you can vote again.", async ({ page }) => {
+  const find = page.locator.bind(page);
+  await page.goto("/");
+
+  const orderedCategory = [
+    "Best Actor",
+    "Best Actress",
+    "Best Director",
+    "Best Picture",
+    "Best Supporting Actor",
+    "Best Supporting Actress",
+    "Best Visual Effects",
+  ];
+
+  for (const item of orderedCategory) {
+    await click(page, `[data-category="${item}"] >> input[type="checkbox"]`);
+    await clickFirst(page, `label[for="vote-${item}"]`);
+    await click(page, `[data-category="${item}"] >> input[type="checkbox"]`);
+  }
+
+  await press(page, "Submit Votes");
+  await press(page, "close");
+
+  for (const item of orderedCategory) {
+    await expectVisible(find, item);
+  }
 });
