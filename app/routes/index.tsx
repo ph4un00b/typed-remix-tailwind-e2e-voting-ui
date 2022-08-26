@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import { ChangeEvent, createContext, Dispatch, SetStateAction, useContext } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useHydrated } from "remix-utils";
 import critical from "~/styles/critical.css";
@@ -55,6 +55,13 @@ export default function Index() {
   }
 }
 
+type SelectedContextT = {
+  selected: {[category: string]: string};
+  setSelected: Dispatch<SetStateAction<any>>;
+};
+
+const SelectedContext = createContext<SelectedContextT | null>(null);
+
 const moviesEndpoint = "https://ph4un00b.github.io/data/30movies.json";
 
 function SearchCode() {
@@ -65,6 +72,7 @@ function SearchCode() {
   const [categories, setCategories] = useState<string[]>([]);
   const [moviesMap, setMoviesMap] = useState<options>({});
   const [votes, setVotes] = useState<string[]>([]);
+  const [selected, setSelected] = useState<any>({});
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -174,7 +182,7 @@ function SearchCode() {
           <div key={category} data-category={category} className="collapse">
             <input type="checkbox" className="peer" />
             <div className="collapse-title m-auto border rounded-md border-gray-300 mb-[1rem] text-primary-content peer-checked:border-rose-600 peer-checked:text-secondary-content">
-              {category}
+              { selected[category] ? `${category}: ${selected[category]} selected!` : category }
             </div>
 
             <div className="collapse-content border-transparent text-primary-content peer-checked:text-secondary-content">
@@ -186,7 +194,10 @@ function SearchCode() {
                       id={`movie-${movie.id}`}
                       className="carousel-item sm:w-full"
                     >
+                      <SelectedContext.Provider value={{selected, setSelected}}>
                       <MovieCardImage data={movie} />
+
+                      </SelectedContext.Provider>
                     </div>
                   ))}
               </div>
@@ -289,8 +300,16 @@ function MovieImage({ data }: { data: Movie }) {
 }
 
 function RadioBtn({ data }: { data: Movie }) {
-  return (
-    <label
+  const { setSelected } = useContext(SelectedContext) as SelectedContextT;
+
+return (
+  <label
+    onClick={() => {
+      setSelected((prev: any) => {
+        prev[data.category] = data.id.replaceAll('-', ' ');
+        return {...prev};
+      });
+    }}
       htmlFor={`vote-${data.category}`}
       className="relative px-4 py-2 text-center rounded-md cursor-pointer"
     >

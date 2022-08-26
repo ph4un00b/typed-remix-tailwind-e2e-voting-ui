@@ -62,7 +62,7 @@ test("Search for a movie title", async ({ page }) => {
   await expectQueryVisible(find, '[data-result="tenet"]');
 });
 
-test("Select a movie per category and show 'selected' state", async ({ page }) => {
+test.only("Select a movie per category and show 'selected' state and Upon submission, display a modal box showing your votes", async ({ page }) => {
   const find = page.locator.bind(page);
   await page.goto("/");
 
