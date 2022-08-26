@@ -1,4 +1,4 @@
-import { ChangeEvent, Fragment } from "react";
+import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useHydrated } from "remix-utils";
 import critical from "~/styles/critical.css";
@@ -64,6 +64,7 @@ function SearchCode() {
   const [query, setQuery] = useState<string>("");
   const [categories, setCategories] = useState<string[]>([]);
   const [moviesMap, setMoviesMap] = useState<options>({});
+  const [votes, setVotes] = useState<string[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -124,8 +125,6 @@ function SearchCode() {
     title.toLowerCase().includes(query.toLowerCase())
   );
 
-  if (titles.length == 0) return <p>...loading</p>;
-
   return (
     <div className="m-auto sm:w-1/2">
       <h1>Movie Awards</h1>
@@ -160,21 +159,25 @@ function SearchCode() {
           filteredMovies
             .slice(0, 1)
             .map((movie) => (
-              <span data-result={movie.id}  key={movie.id}>
-                <MovieCardImage data={movie} />
+              <span data-result={movie.id} key={movie.id}>
+                <MovieImage data={movie} />
               </span>
             ))}
       </ul>
 
-      <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
+      <form
+        className="pt-[1.5rem]"
+        ref={formRef}
+        onSubmit={(e) => e.preventDefault()}
+      >
         {categories.map((category) => (
-          <div key={category} className="collapse">
+          <div key={category} data-category={category} className="collapse">
             <input type="checkbox" className="peer" />
             <div className="collapse-title m-auto border rounded-md border-gray-300 mb-[1rem] text-primary-content peer-checked:border-rose-600 peer-checked:text-secondary-content">
               {category}
             </div>
 
-            <div className="collapse-content border-tranparent text-primary-content peer-checked:text-secondary-content">
+            <div className="collapse-content border-transparent text-primary-content peer-checked:text-secondary-content">
               <div className="carousel carousel-center sm:max-w p-4 space-x-4 sm:space-x-10 bg-neutral">
                 {moviesMap[category].length > 0 &&
                   moviesMap[category].map((movie) => (
@@ -196,7 +199,7 @@ function SearchCode() {
                       href={`#movie-${movie.id}`}
                       className="btn btn-md m-2"
                     >
-                      {String(movie.id).replaceAll("-", " ")}
+                      {movie.id.replaceAll("-", " ")}
                     </a>
                   ))}
               </div>
@@ -209,7 +212,11 @@ function SearchCode() {
           onClick={() => {
             if (formRef.current) {
               const formData = new FormData(formRef.current);
-              console.log("sending!", JSON.stringify([...formData.entries()]));
+              const votes = [...formData.entries()]
+                .map((x) => {
+                  return `${x[0]}: ${String(x[1]).replaceAll("-", " ")}`;
+                });
+              setVotes(votes);
             }
           }}
           htmlFor="my-modal-6"
@@ -224,6 +231,9 @@ function SearchCode() {
         <div className="modal-box">
           <h3 className="font-bold text-lg uppercase">Votes sumitted!</h3>
           <p className="py-4">Your votes:</p>
+          <ul>
+            {votes && votes.map((vote) => <li key={vote}>{vote}</li>)}
+          </ul>
           <div className="modal-action">
             <label htmlFor="my-modal-6" className="btn">
               close
@@ -244,7 +254,12 @@ function MovieCardImage({ data }: { data: Movie }) {
       <figure>
         {/* todo: lazy skeleton for img */}
         {/* retrasando la carga de imagenes para alivianar la carga inicial del sitio */}
-        <img data-image={data.id} loading="lazy" src={data.photoUrL} alt={`${data.id} imagen`} />
+        <img
+          data-image={data.id}
+          loading="lazy"
+          src={data.photoUrL}
+          alt={`${data.id} imagen`}
+        />
       </figure>
       <div className="grid place-items-center card-body">
         <h2 className="card-title font-medium text-gray-100">{data.title}</h2>
@@ -256,14 +271,31 @@ function MovieCardImage({ data }: { data: Movie }) {
   );
 }
 
+function MovieImage({ data }: { data: Movie }) {
+  return (
+    <div className="card w-[16rem] sm:w-[23rem] m-auto bg-base-100 shadow-xl image-full">
+      <figure>
+        {/* todo: lazy skeleton for img */}
+        {/* retrasando la carga de imagenes para alivianar la carga inicial del sitio */}
+        <img
+          data-image={data.id}
+          loading="lazy"
+          src={data.photoUrL}
+          alt={`${data.id} imagen`}
+        />
+      </figure>
+    </div>
+  );
+}
+
 function RadioBtn({ data }: { data: Movie }) {
   return (
     <label
-      htmlFor={`vote-${data.id}`}
+      htmlFor={`vote-${data.category}`}
       className="relative px-4 py-2 text-center rounded-md cursor-pointer"
     >
       <input
-        id={`vote-${data.id}`}
+        id={`vote-${data.category}`}
         name={data.category}
         value={data.id}
         type="radio"
