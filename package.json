@@ -2,6 +2,8 @@
   "private": true,
   "sideEffects": false,
   "scripts": {
+    "e2e": "playwright test --retries=2",
+    "e2e:debug": "playwright test --debug",
     "build": "remix build",
     "dev": "remix dev"
   },
@@ -15,6 +17,7 @@
     "remix-utils": "^3.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.25.1",
     "@remix-run/dev": "^1.7.0",
     "@remix-run/eslint-config": "^1.7.0",
     "@remix-run/serve": "^1.7.0",

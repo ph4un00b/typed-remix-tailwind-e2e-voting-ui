@@ -16,7 +16,7 @@ type options = {
 
 export function links() {
   // para la demo, no se post-proceso el css
-  // esto se configura tradicionalmente con postcss
+  // pero, esto se configura tradicionalmente con postcss
   return [
     { rel: "stylesheet", href: critical },
     {
@@ -115,13 +115,14 @@ function SearchCode() {
 
   return (
     <div className="m-auto sm:w-1/2">
+      <h1>Movie Awards</h1>
       <input
         className="input input-bordered w-full my-3 placeholder:uppercase"
         type="text"
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           setQuery(e.target.value);
         }}
-        placeholder="search movie"
+        placeholder="search a movie title..."
         value={query}
       />
 
@@ -163,6 +164,7 @@ function SearchCode() {
           </div>
         ))}
 
+        {/* propswithchildren */}
         <label
           onClick={() => {
             if (formRef.current) {
