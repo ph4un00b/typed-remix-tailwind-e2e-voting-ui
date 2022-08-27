@@ -37,7 +37,7 @@ export default function Index() {
   // just for demo, simulating CSR client-side loading
   if (isHydrated && isLoaded) {
     return (
-      <div className="pt-[1rem]">
+      <div className="pt-[1rem] mx-6">
         <SearchCode />
       </div>
     );
