@@ -78,7 +78,7 @@ test("Select a movie per category and show 'selected' state and Upon submission,
 
   for (const item of orderedCategory) {
     await click(page, `[data-category="${item}"] >> input[type="checkbox"]`);
-    await clickFirst(page, `label[for="vote-${item}"]`);
+    await clickFirst(page, `[data-option="${item}"]`);
     await click(page, `[data-category="${item}"] >> input[type="checkbox"]`);
   }
 
@@ -109,7 +109,7 @@ test("When the modal is closed, the ballot resets and you can vote again.", asyn
 
   for (const item of orderedCategory) {
     await click(page, `[data-category="${item}"] >> input[type="checkbox"]`);
-    await clickFirst(page, `label[for="vote-${item}"]`);
+    await clickFirst(page, `[data-option="${item}"]`);
     await click(page, `[data-category="${item}"] >> input[type="checkbox"]`);
   }
 

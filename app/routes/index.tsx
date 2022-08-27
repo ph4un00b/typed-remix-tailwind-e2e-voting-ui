@@ -46,7 +46,7 @@ export default function Index() {
     // but remix is SSR first
     return (
       <div className="m-auto sm:w-1/2">
-        <SkeletonP />
+        <Skeleton />
       </div>
     );
   }
@@ -308,7 +308,6 @@ function MovieImage({ data }: { data: Movie }) {
     <div className="card w-[16rem] sm:w-[23rem] m-auto bg-base-100 shadow-xl image-full">
       <figure>
         {/* todo: lazy skeleton for img */}
-        {/* retrasando la carga de imagenes para alivianar la carga inicial del sitio */}
         <img
           data-image={data.id}
           loading="lazy"
@@ -331,11 +330,12 @@ function RadioBtn({ data }: { data: Movie }) {
           return { ...prev };
         });
       }}
-      htmlFor={`vote-${data.category}`}
+      data-option={data.category}
+      htmlFor={`vote-${data.id}`}
       className="relative px-4 py-2 text-center rounded-md cursor-pointer"
     >
       <input
-        id={`vote-${data.category}`}
+        id={`vote-${data.id}`}
         name={data.category}
         value={data.id}
         type="radio"
@@ -348,7 +348,7 @@ function RadioBtn({ data }: { data: Movie }) {
   );
 }
 
-function SkeletonP() {
+function Skeleton() {
   return (
     <div>
       <span className="skeleton-box" style={{ width: "80%" }}></span>
