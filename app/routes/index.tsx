@@ -1,5 +1,9 @@
-import type { ChangeEvent, Dispatch, RefObject, SetStateAction } from "react";
-import { createContext, useContext } from "react";
+import type {
+  ChangeEvent,
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+} from "react";
 import { useEffect, useRef, useState } from "react";
 import { useHydrated } from "remix-utils";
 import critical from "~/styles/critical.css";
@@ -52,12 +56,12 @@ export default function Index() {
   }
 }
 
-type SelectedContextT = {
-  selected: Record<string, string>;
-  setSelected: Dispatch<SetStateAction<Record<string, string>>>;
-};
+// type SelectedContextT = {
+//   selected: Record<string, string>;
+//   setSelected: Dispatch<SetStateAction<Record<string, string>>>;
+// };
 
-const SelectedContext = createContext<SelectedContextT | null>(null);
+// const SelectedContext = createContext<SelectedContextT | null>(null);
 const moviesEndpoint = "https://ph4un00b.github.io/data/30movies.json";
 
 function SearchCode() {
@@ -141,11 +145,11 @@ function SearchCode() {
                       id={`movie-${movie.id}`}
                       className="carousel-item sm:w-full"
                     >
-                      <SelectedContext.Provider
-                        value={{ selected, setSelected }}
-                      >
-                        <MovieCardImage data={movie} />
-                      </SelectedContext.Provider>
+                      <MovieCardImage data={movie}>
+                        <VoteButton data={movie} setSelected={setSelected}>
+                          Vote
+                        </VoteButton>
+                      </MovieCardImage>
                     </div>
                   ))}
               </div>
@@ -175,9 +179,18 @@ function SearchCode() {
         </label>
       </form>
 
-      <SelectedContext.Provider value={{ selected, setSelected }}>
-        <ModalResult formRef={formRef} />
-      </SelectedContext.Provider>
+      <ModalResult selected={selected}>
+        <label
+          onClick={() => {
+            formRef.current?.reset();
+            setSelected({});
+          }}
+          htmlFor="my-modal-6"
+          className="btn"
+        >
+          close
+        </label>
+      </ModalResult>
     </div>
   );
 }
@@ -244,10 +257,15 @@ function SearchMovie({ titles }: { titles: Movie[] }) {
   );
 }
 
-function ModalResult({ formRef }: { formRef: RefObject<HTMLFormElement> }) {
-  const { selected, setSelected } = useContext(
-    SelectedContext,
-  ) as SelectedContextT;
+function ModalResult(
+  { children, selected }: {
+    children: ReactNode;
+    selected: Record<string, string>;
+  },
+) {
+  // const { selected, setSelected } = useContext(
+  //   SelectedContext,
+  // ) as SelectedContextT;
 
   return (
     <>
@@ -263,16 +281,7 @@ function ModalResult({ formRef }: { formRef: RefObject<HTMLFormElement> }) {
               ))}
           </ul>
           <div className="modal-action">
-            <label
-              onClick={() => {
-                formRef.current?.reset();
-                setSelected({});
-              }}
-              htmlFor="my-modal-6"
-              className="btn"
-            >
-              close
-            </label>
+            {children}
           </div>
         </div>
       </div>
@@ -280,7 +289,9 @@ function ModalResult({ formRef }: { formRef: RefObject<HTMLFormElement> }) {
   );
 }
 
-function MovieCardImage({ data }: { data: Movie }) {
+function MovieCardImage(
+  { children, data }: { children: ReactNode; data: Movie },
+) {
   return (
     <div className="card w-[16rem] sm:w-[23rem] m-auto bg-base-100 shadow-xl image-full">
       <figure>
@@ -296,7 +307,7 @@ function MovieCardImage({ data }: { data: Movie }) {
       <div className="grid place-items-center card-body">
         <h2 className="card-title font-medium text-gray-100">{data.title}</h2>
         <div className="card-actions justify-center">
-          <RadioBtn data={data} />
+          {children}
         </div>
       </div>
     </div>
@@ -319,8 +330,14 @@ function MovieImage({ data }: { data: Movie }) {
   );
 }
 
-function RadioBtn({ data }: { data: Movie }) {
-  const { setSelected } = useContext(SelectedContext) as SelectedContextT;
+function VoteButton(
+  { children, data, setSelected }: {
+    children: ReactNode;
+    data: Movie;
+    setSelected: Dispatch<SetStateAction<Record<string, string>>>;
+  },
+) {
+  // const { setSelected } = useContext(SelectedContext) as SelectedContextT;
 
   return (
     <label
@@ -341,7 +358,9 @@ function RadioBtn({ data }: { data: Movie }) {
         type="radio"
         className="hidden z-20 bg-transparent rounded-md peer"
       />
-      <span className="inset-0 w-full h-[1rem] m-auto text-white">Vote</span>
+      <span className="inset-0 w-full h-[1rem] m-auto text-white">
+        {children}
+      </span>
       <div className="absolute inset-0 peer-checked:border-sky-500 border rounded-md">
       </div>
     </label>
@@ -351,16 +370,26 @@ function RadioBtn({ data }: { data: Movie }) {
 function Skeleton() {
   return (
     <div className="pt-[1rem]">
-      <span className="skeleton-box" style={{ width: "84%", height: "2rem" }}></span>
-      <span className="skeleton-box" style={{ width: "70%", height: "4rem" }}></span>
-      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
-      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
-      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
-      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
-      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
-      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
-      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
-      <span className="skeleton-box" style={{ width: "70%", height: "1.5rem" }}></span>
+      <span className="skeleton-box" style={{ width: "84%", height: "2rem" }}>
+      </span>
+      <span className="skeleton-box" style={{ width: "70%", height: "4rem" }}>
+      </span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}>
+      </span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}>
+      </span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}>
+      </span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}>
+      </span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}>
+      </span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}>
+      </span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}>
+      </span>
+      <span className="skeleton-box" style={{ width: "70%", height: "1.5rem" }}>
+      </span>
     </div>
   );
 }
