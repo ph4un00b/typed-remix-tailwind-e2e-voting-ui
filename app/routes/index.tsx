@@ -37,7 +37,7 @@ export default function Index() {
   // just for demo, simulating CSR client-side loading
   if (isHydrated && isLoaded) {
     return (
-      <div>
+      <div className="pt-[1rem]">
         <SearchCode />
       </div>
     );
@@ -126,7 +126,7 @@ function SearchCode() {
         {categories.map((category) => (
           <div key={category} data-category={category} className="collapse">
             <input type="checkbox" className="peer" />
-            <div className="collapse-title m-auto border rounded-md border-gray-300 mb-[1rem] text-primary-content peer-checked:border-rose-600 peer-checked:text-secondary-content">
+            <div className="collapse-title m-auto border rounded-md border-gray-300 mb-[1rem] text-secondary-content peer-checked:border-rose-600 peer-checked:text-secondary-content">
               {selected[category]
                 ? `${category}: ${selected[category]} selected!`
                 : category}
@@ -350,10 +350,17 @@ function RadioBtn({ data }: { data: Movie }) {
 
 function Skeleton() {
   return (
-    <div>
-      <span className="skeleton-box" style={{ width: "80%" }}></span>
-      <span className="skeleton-box" style={{ width: "90%" }}></span>
-      <span className="skeleton-box" style={{ width: "83%" }}></span>
+    <div className="pt-[1rem]">
+      <span className="skeleton-box" style={{ width: "84%", height: "2rem" }}></span>
+      <span className="skeleton-box" style={{ width: "70%", height: "4rem" }}></span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
+      <span className="skeleton-box" style={{ width: "90%", height: "3.5rem" }}></span>
+      <span className="skeleton-box" style={{ width: "70%", height: "1.5rem" }}></span>
     </div>
   );
 }
