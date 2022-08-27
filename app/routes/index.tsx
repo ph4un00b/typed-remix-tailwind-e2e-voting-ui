@@ -1,11 +1,5 @@
-import type {
-  ChangeEvent,
-  Dispatch,
-  SetStateAction} from "react";
-import {
-  createContext,
-  useContext,
-} from "react";
+import type { ChangeEvent, Dispatch, RefObject, SetStateAction } from "react";
+import { createContext, useContext } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useHydrated } from "remix-utils";
 import critical from "~/styles/critical.css";
@@ -15,10 +9,6 @@ type Movie = {
   title: string;
   category: string;
   photoUrL: string;
-};
-
-type options = {
-  [categoryName: string]: Movie[];
 };
 
 export function links() {
@@ -74,9 +64,8 @@ function SearchCode() {
   const [titles, setTitles] = useState<Movie[]>([
     { id: "", title: "", category: "", photoUrL: "" },
   ]);
-  const [query, setQuery] = useState<string>("");
   const [categories, setCategories] = useState<string[]>([]);
-  const [moviesMap, setMoviesMap] = useState<options>({});
+  const [moviesMap, setMoviesMap] = useState<Record<string, Movie[]>>({});
   const [selected, setSelected] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -94,7 +83,7 @@ function SearchCode() {
         const { movies } = await res.json();
         setTitles(movies);
 
-        const moviesMap: options = {};
+        const moviesMap: Record<string, Movie[]> = {};
         for (const item of movies as Movie[]) {
           if (!(item.category in moviesMap)) {
             moviesMap[item.category] = [];
@@ -123,6 +112,81 @@ function SearchCode() {
     };
   }, []);
 
+  return (
+    <div className="m-auto sm:w-1/2">
+      <h1>Movie Awards</h1>
+
+      <SearchMovie titles={titles} />
+
+      <form
+        className="pt-[1.5rem]"
+        ref={formRef}
+        onSubmit={(e) => e.preventDefault()}
+      >
+        {categories.map((category) => (
+          <div key={category} data-category={category} className="collapse">
+            <input type="checkbox" className="peer" />
+            <div className="collapse-title m-auto border rounded-md border-gray-300 mb-[1rem] text-primary-content peer-checked:border-rose-600 peer-checked:text-secondary-content">
+              {selected[category]
+                ? `${category}: ${selected[category]} selected!`
+                : category}
+            </div>
+
+            <div className="collapse-content border-transparent text-primary-content peer-checked:text-secondary-content">
+              <div className="carousel carousel-center sm:max-w p-4 space-x-4 sm:space-x-10 bg-neutral">
+                {moviesMap[category].length > 0 &&
+                  moviesMap[category].map((movie) => (
+                    <div
+                      key={movie.id}
+                      id={`movie-${movie.id}`}
+                      className="carousel-item sm:w-full"
+                    >
+                      <SelectedContext.Provider
+                        value={{ selected, setSelected }}
+                      >
+                        <MovieCardImage data={movie} />
+                      </SelectedContext.Provider>
+                    </div>
+                  ))}
+              </div>
+
+              {/* only desktop options */}
+              <div className="flex flex-row flex-wrap justify-center w-full py-2 gap-2 hidden sm:block">
+                {moviesMap[category].length > 0 &&
+                  moviesMap[category].map((movie) => (
+                    <a
+                      key={movie.id}
+                      href={`#movie-${movie.id}`}
+                      className="btn btn-md m-2"
+                    >
+                      {movie.id.replaceAll("-", " ")}
+                    </a>
+                  ))}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <label
+          htmlFor="my-modal-6"
+          className="btn btn-secondary modal-button my-[1.5rem]"
+        >
+          Submit Votes
+        </label>
+      </form>
+
+      <SelectedContext.Provider value={{ selected, setSelected }}>
+        <ModalResult formRef={formRef} />
+      </SelectedContext.Provider>
+    </div>
+  );
+}
+
+// colocated components until it grows organically
+// then we can procceed to (atomic design, screaming design, by feature, etc.)
+
+function SearchMovie({ titles }: { titles: Movie[] }) {
+  const [query, setQuery] = useState<string>("");
   // we could memoize (useMemo) this but we need real metrics to do that.
   // {
   //   const filteredMovies = useMemo(
@@ -139,8 +203,7 @@ function SearchCode() {
   );
 
   return (
-    <div className="m-auto sm:w-1/2">
-      <h1>Movie Awards</h1>
+    <>
       <input
         className="input input-bordered w-full my-3 placeholder:uppercase"
         type="text"
@@ -177,63 +240,17 @@ function SearchCode() {
               </span>
             ))}
       </ul>
+    </>
+  );
+}
 
-      <form
-        className="pt-[1.5rem]"
-        ref={formRef}
-        onSubmit={(e) => e.preventDefault()}
-      >
-        {categories.map((category) => (
-          <div key={category} data-category={category} className="collapse">
-            <input type="checkbox" className="peer" />
-            <div className="collapse-title m-auto border rounded-md border-gray-300 mb-[1rem] text-primary-content peer-checked:border-rose-600 peer-checked:text-secondary-content">
-              {selected[category]
-                ? `${category}: ${selected[category]} selected!`
-                : category}
-            </div>
+function ModalResult({ formRef }: { formRef: RefObject<HTMLFormElement> }) {
+  const { selected, setSelected } = useContext(
+    SelectedContext,
+  ) as SelectedContextT;
 
-            <div className="collapse-content border-transparent text-primary-content peer-checked:text-secondary-content">
-              <div className="carousel carousel-center sm:max-w p-4 space-x-4 sm:space-x-10 bg-neutral">
-                {moviesMap[category].length > 0 &&
-                  moviesMap[category].map((movie) => (
-                    <div
-                      key={movie.id}
-                      id={`movie-${movie.id}`}
-                      className="carousel-item sm:w-full"
-                    >
-                      <SelectedContext.Provider
-                        value={{ selected, setSelected }}
-                      >
-                        <MovieCardImage data={movie} />
-                      </SelectedContext.Provider>
-                    </div>
-                  ))}
-              </div>
-
-              <div className="flex flex-row flex-wrap justify-center w-full py-2 gap-2 hidden sm:block">
-                {moviesMap[category].length > 0 &&
-                  moviesMap[category].map((movie) => (
-                    <a
-                      key={movie.id}
-                      href={`#movie-${movie.id}`}
-                      className="btn btn-md m-2"
-                    >
-                      {movie.id.replaceAll("-", " ")}
-                    </a>
-                  ))}
-              </div>
-            </div>
-          </div>
-        ))}
-
-        <label
-          htmlFor="my-modal-6"
-          className="btn btn-secondary modal-button my-[1.5rem]"
-        >
-          Submit Votes
-        </label>
-      </form>
-
+  return (
+    <>
       <input type="checkbox" id="my-modal-6" className="modal-toggle" />
       <div className="modal modal-bottom sm:modal-middle">
         <div className="modal-box">
@@ -259,12 +276,9 @@ function SearchCode() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
-
-// colocated components until it grows organically
-// then we can procceed to (atomic design, screaming design, by feature, etc.)
 
 function MovieCardImage({ data }: { data: Movie }) {
   return (
