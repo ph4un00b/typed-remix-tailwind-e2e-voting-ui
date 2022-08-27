@@ -1,3 +1,4 @@
+![UI](./ui-voting.jpg)
 # Tests
 
 ```sh
