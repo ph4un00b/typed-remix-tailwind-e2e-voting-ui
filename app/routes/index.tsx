@@ -126,7 +126,7 @@ function SearchCode() {
         {categories.map((category) => (
           <div key={category} data-category={category} className="collapse">
             <input type="checkbox" className="peer" />
-            <div className="collapse-title m-auto border rounded-md border-gray-300 mb-[1rem] text-secondary-content peer-checked:border-rose-600 peer-checked:text-secondary-content">
+            <div className="collapse-title text-center p-[1rem] border rounded-md border-gray-300 mb-[1rem] text-secondary-content peer-checked:border-rose-600 peer-checked:text-secondary-content">
               {selected[category]
                 ? `${category}: ${selected[category]} selected!`
                 : category}
